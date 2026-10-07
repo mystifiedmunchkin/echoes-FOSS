@@ -1,0 +1,75 @@
+{
+  "expo": {
+    "newArchEnabled": true,
+    "name": "ECHOES",
+    "slug": "echoes-mobile",
+    "scheme": "echoes",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "ECHOES a besoin de la caméra pour afficher les souvenirs en Réalité Augmentée.",
+        "NSPhotoLibraryUsageDescription": "ECHOES a besoin d'accéder aux photos pour les souvenirs.",
+        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos",
+        "NSMicrophoneUsageDescription": "ECHOES a besoin du microphone pour les souvenirs audio."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.sophiehorner.echoesmobile",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-image-picker",
+      "expo-video",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "ECHOES a besoin du microphone pour enregistrer les souvenirs audio."
+        }
+      ],
+      "react-native-compressor",
+      "expo-asset",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "ECHOES utilise votre position pour afficher les souvenirs proches."
+        }
+      ],
+      [
+        "@reactvision/react-viro",
+        {
+          "android": {
+            "xRMode": "AR"
+          },
+          "ios": {
+            "cameraUsagePermission": "ECHOES a besoin de la caméra pour afficher les souvenirs en Réalité Augmentée.",
+            "microphoneUsagePermission": "ECHOES a besoin du microphone pour les souvenirs audio.",
+            "photosPermission": "ECHOES a besoin d'accéder aux photos pour les souvenirs.",
+            "savephotosPermission": "ECHOES a besoin d'enregistrer les souvenirs dans vos photos."
+          }
+        }
+      ],
+      "expo-router"
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+material {
+    name : DepthMask,
+    shadingModel : unlit,
+    colorWrite : false,
+    depthWrite : true
+}

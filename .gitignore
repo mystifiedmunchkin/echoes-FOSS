@@ -1,0 +1,157 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios/build
+/android/build
+
+android/build/
+modules/**/android/build/
+.gradle/
+
+
+# ==============================================================================
+# Node & Dependencies
+# ==============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+.yarn/
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# ==============================================================================
+# Expo
+# ==============================================================================
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.expo*
+
+# Expo Prebuild / Bare Workflow local files
+# Uncomment ios/ and android/ ONLY if using managed workflow without custom native code
+# ios/
+# android/
+
+# ==============================================================================
+# Android
+# ==============================================================================
+android/app/build/
+android/build/
+android/.gradle/
+android/captures/
+android/.idea/
+android/app/app.iml
+android/local.properties
+android/keystores/debug.keystore
+android/app/debug.keystore
+
+# Nested module build directories (e.g., custom local modules / Expo modules)
+modules/**/android/build/
+modules/**/android/.gradle/
+
+# ==============================================================================
+# iOS
+# ==============================================================================
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/*.xcworkspace/
+!ios/*.xcodeproj/project.xcworkspace/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/**/*.xcworkspace/
+!ios/**/*.xcodeproj/project.xcworkspace/
+ios/**/*.xcodeproj/xcuserdata/
+ios/**/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/Podfile.lock
+
+# Fastlane
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+android/fastlane/report.xml
+
+# ==============================================================================
+# Environment Variables & Secrets
+# ==============================================================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.keystore
+*.jks
+*.p12
+*.key
+*.mobileprovision
+
+# ==============================================================================
+# IDEs & System Files
+# ==============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Temporary / Cache
+*.tmp
+*.log
+.cache/
+.metro-health-check*

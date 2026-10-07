@@ -1,0 +1,6 @@
+# Set default behavior to normalize all text files to LF on check-in
+* text=auto eol=lf
+
+# Ensure shell scripts always keep LF (required for Linux/macOS execution)
+*.sh text eol=lf
+gradlew text eol=lf
