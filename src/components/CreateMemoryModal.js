@@ -1,5 +1,5 @@
 /** Captures optional media and submits a map-anchored memory to the API. */
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -103,6 +103,45 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
   const [loading, setLoading] = useState(false);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(audioRecorder);
+  const recorderIsRecordingRef = useRef(false);
+
+  useEffect(() => {
+    recorderIsRecordingRef.current = recorderState.isRecording;
+  }, [recorderState.isRecording]);
+
+  const stopActiveRecording = useCallback(async (saveRecording) => {
+    if (!recorderIsRecordingRef.current) return null;
+
+    try {
+      await audioRecorder.stop();
+      recorderIsRecordingRef.current = false;
+      if (!saveRecording || !audioRecorder.uri) return null;
+
+      const audioAsset = {
+        uri: audioRecorder.uri,
+        type: 'audio',
+        fileName: `audio_${Date.now()}.m4a`,
+      };
+      setSelectedMedia(audioAsset);
+      return audioAsset;
+    } finally {
+      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+    }
+  }, [audioRecorder]);
+
+  useEffect(() => {
+    if (visible) return;
+
+    stopActiveRecording(false).catch((error) => {
+      console.warn('Impossible d’arrêter l’enregistrement audio', error);
+    });
+  }, [stopActiveRecording, visible]);
+
+  useEffect(() => () => {
+    stopActiveRecording(false).catch((error) => {
+      console.warn('Impossible d’arrêter l’enregistrement audio', error);
+    });
+  }, [stopActiveRecording]);
 
   const captureMedia = async (mediaType) => {
     if (!currentLocation) {
@@ -166,15 +205,7 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
 
   const toggleAudioRecording = async () => {
     if (recorderState.isRecording) {
-      await audioRecorder.stop();
-      if (audioRecorder.uri) {
-        setSelectedMedia({
-          uri: audioRecorder.uri,
-          type: 'audio',
-          fileName: `audio_${Date.now()}.m4a`,
-        });
-      }
-      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+      await stopActiveRecording(true);
       return;
     }
 
@@ -203,12 +234,13 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
     setLoading(true);
 
     try {
+      const recordedAudio = await stopActiveRecording(true);
       const payload = {
         title: title.trim(),
         description: description.trim(),
         latitude: parseFloat(currentLocation.latitude),
         longitude: parseFloat(currentLocation.longitude),
-        mediaAssets: selectedMedia ? [selectedMedia] : [],
+        mediaAssets: recordedAudio || selectedMedia ? [recordedAudio || selectedMedia] : [],
       };
 
       const result = await createMemory(payload);

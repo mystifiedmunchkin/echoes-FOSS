@@ -9,6 +9,7 @@ import {
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCameraPermissions } from 'expo-camera';
 import * as Device from 'expo-device';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const isProblematicARDevice = () => {
   const manufacturer = Device.manufacturer?.toLowerCase() || '';
@@ -35,6 +36,8 @@ import CollectionParticle from '../components/CollectionParticle';
 import { CreateMemoryModal } from '../src/components/CreateMemoryModal';
 import { MemoryAudioPlayer } from '../src/components/MemoryAudioPlayer';
 import { MemoryInfoModal } from '../src/components/MemoryInfoModal';
+import FilamentModelViewer from '../src/components/FilamentModelViewer';
+import { FullscreenMediaViewer } from '../src/components/FullscreenMediaViewer';
 import { AccountModal } from '../src/components/AccountModal';
 import { useAuth } from '../src/hooks/useAuth';
 import { COLORS } from './theme';
@@ -42,12 +45,15 @@ import { useI18n } from '../constants/i18n';
 const ViroARView = React.lazy(() => import('../src/components/ViroARView'));
 const AR_MEMORY_MAX_RADIUS_METERS = 5000;
 const AR_SESSION_RELEASE_MS = 1500;
+const MODEL_VIEWER_RELEASE_MS = 500;
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <AppContent />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={styles.gestureRoot}>
+      <SafeAreaProvider>
+        <AppContent />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -116,6 +122,150 @@ function AppContent() {
   const [selectedCreationCoords, setSelectedCreationCoords] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [selectedMemoryToInspect, setSelectedMemoryToInspect] = useState(null);
+  const [modelViewerMemory, setModelViewerMemory] = useState(null);
+  const [isPreparingModelViewer, setIsPreparingModelViewer] = useState(false);
+  const modelViewerRequestKey = useRef(0);
+  const modelViewerTransitionTimer = useRef(null);
+  const [mediaViewer, setMediaViewer] = useState(null);
+  const [isPreparingMediaViewer, setIsPreparingMediaViewer] = useState(false);
+  const mediaViewerRequestKey = useRef(0);
+  const mediaViewerTransitionTimer = useRef(null);
+
+  useEffect(() => {
+    if (!showInfoModal || !selectedMemoryToInspect) return undefined;
+
+    let isCurrentSelection = true;
+    cacheMemoryAssets(selectedMemoryToInspect)
+      .then((cachedMemory) => {
+        if (!isCurrentSelection) return;
+        setSelectedMemoryToInspect((currentMemory) => (
+          currentMemory && String(currentMemory.id) === String(cachedMemory.id)
+            ? cachedMemory
+            : currentMemory
+        ));
+      })
+      .catch((error) => {
+        if (isCurrentSelection) {
+          console.warn('Impossible de préparer les médias du souvenir', error);
+        }
+      });
+
+    return () => {
+      isCurrentSelection = false;
+    };
+  }, [cacheMemoryAssets, selectedMemoryToInspect?.id, showInfoModal]);
+
+  useEffect(() => () => {
+    if (modelViewerTransitionTimer.current) {
+      clearTimeout(modelViewerTransitionTimer.current);
+    }
+    if (mediaViewerTransitionTimer.current) {
+      clearTimeout(mediaViewerTransitionTimer.current);
+    }
+  }, []);
+
+  const openModelViewer = useCallback(async (memory) => {
+    if (!memory?.model_url) return;
+
+    const requestKey = ++modelViewerRequestKey.current;
+    if (modelViewerTransitionTimer.current) {
+      clearTimeout(modelViewerTransitionTimer.current);
+    }
+    setShowInfoModal(false);
+    setSelectedMemoryToInspect(null);
+    setIsPreparingModelViewer(true);
+
+    try {
+      const cachedMemory = await cacheMemoryAssets(memory);
+      if (modelViewerRequestKey.current !== requestKey) return;
+
+      modelViewerTransitionTimer.current = setTimeout(() => {
+        if (modelViewerRequestKey.current !== requestKey) return;
+        setModelViewerMemory(cachedMemory);
+        setIsPreparingModelViewer(false);
+      }, MODEL_VIEWER_RELEASE_MS);
+    } catch (error) {
+      if (modelViewerRequestKey.current !== requestKey) return;
+      setIsPreparingModelViewer(false);
+      Alert.alert(
+        t('modelLoadError'),
+        error instanceof Error ? error.message : t('modelPreparationError'),
+      );
+    }
+  }, [cacheMemoryAssets, t]);
+
+  const closeModelViewer = useCallback(() => {
+    const requestKey = ++modelViewerRequestKey.current;
+    if (modelViewerTransitionTimer.current) {
+      clearTimeout(modelViewerTransitionTimer.current);
+    }
+
+    if (!modelViewerMemory) {
+      setIsPreparingModelViewer(false);
+      return;
+    }
+
+    setModelViewerMemory(null);
+    setIsPreparingModelViewer(true);
+    modelViewerTransitionTimer.current = setTimeout(() => {
+      if (modelViewerRequestKey.current === requestKey) {
+        setIsPreparingModelViewer(false);
+      }
+    }, MODEL_VIEWER_RELEASE_MS);
+  }, [modelViewerMemory]);
+
+  const openMediaViewer = useCallback(async (memory, type) => {
+    const mediaUrl = memory?.[`${type}_url`];
+    if (!mediaUrl) return;
+
+    const requestKey = ++mediaViewerRequestKey.current;
+    if (mediaViewerTransitionTimer.current) {
+      clearTimeout(mediaViewerTransitionTimer.current);
+    }
+    setShowInfoModal(false);
+    setSelectedMemoryToInspect(null);
+    setIsPreparingMediaViewer(true);
+
+    try {
+      const cachedMemory = await cacheMemoryAssets(memory);
+      const source = cachedMemory[`${type}_url`];
+      if (!source) throw new Error(t('mediaLoadError'));
+      if (mediaViewerRequestKey.current !== requestKey) return;
+
+      mediaViewerTransitionTimer.current = setTimeout(() => {
+        if (mediaViewerRequestKey.current !== requestKey) return;
+        setMediaViewer({ name: cachedMemory.name, source, type });
+        setIsPreparingMediaViewer(false);
+      }, MODEL_VIEWER_RELEASE_MS);
+    } catch (error) {
+      if (mediaViewerRequestKey.current !== requestKey) return;
+      setIsPreparingMediaViewer(false);
+      Alert.alert(
+        t('mediaLoadError'),
+        error instanceof Error ? error.message : t('mediaLoadError'),
+      );
+    }
+  }, [cacheMemoryAssets, t]);
+
+  const closeMediaViewer = useCallback(() => {
+    const requestKey = ++mediaViewerRequestKey.current;
+    if (mediaViewerTransitionTimer.current) {
+      clearTimeout(mediaViewerTransitionTimer.current);
+    }
+
+    if (!mediaViewer) {
+      setIsPreparingMediaViewer(false);
+      return;
+    }
+
+    setMediaViewer(null);
+    setIsPreparingMediaViewer(true);
+    mediaViewerTransitionTimer.current = setTimeout(() => {
+      if (mediaViewerRequestKey.current === requestKey) {
+        setIsPreparingMediaViewer(false);
+      }
+    }, MODEL_VIEWER_RELEASE_MS);
+  }, [mediaViewer]);
 
   // --- Mode creation de souvenir depuis la vue AR ---
   const [isCreatingInAR, setIsCreatingInAR] = useState(false);
@@ -364,6 +514,59 @@ function AppContent() {
   // }
 
   // --- VUE CAMERA (RA) ---
+  if (isPreparingModelViewer || modelViewerMemory) {
+    return (
+      <View style={styles.modelViewerScreen} collapsable={false}>
+        {modelViewerMemory ? (
+          <FilamentModelViewer
+            modelUrl={modelViewerMemory.model_url}
+            style={styles.fullscreenModelViewer}
+          />
+        ) : (
+          <View style={styles.modelViewerLoading}>
+            <ActivityIndicator size="small" color={COLORS.accent} />
+            <Text style={styles.loaderText}>{t('loading')}</Text>
+          </View>
+        )}
+        <View style={[styles.modelViewerHeader, { paddingTop: insets.top + 12 }]}>
+          <TouchableOpacity
+            style={styles.backButtonHeader}
+            onPress={closeModelViewer}
+            accessibilityRole="button"
+            accessibilityLabel={t('closeModelViewer')}
+          >
+            <Text style={styles.backButtonText}>×</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  if (isPreparingMediaViewer || mediaViewer) {
+    return (
+      <View style={styles.modelViewerScreen} collapsable={false}>
+        {mediaViewer ? (
+          <FullscreenMediaViewer source={mediaViewer.source} type={mediaViewer.type} />
+        ) : (
+          <View style={styles.modelViewerLoading}>
+            <ActivityIndicator size="small" color={COLORS.accent} />
+            <Text style={styles.loaderText}>{t('loading')}</Text>
+          </View>
+        )}
+        <View style={[styles.modelViewerHeader, { paddingTop: insets.top + 12 }]}>
+          <TouchableOpacity
+            style={styles.backButtonHeader}
+            onPress={closeMediaViewer}
+            accessibilityRole="button"
+            accessibilityLabel={t('closeMediaViewer')}
+          >
+            <Text style={styles.backButtonText}>×</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   if (showCamera) {
 
     //// when opening the AR camera no memories should be selected yet
@@ -762,6 +965,9 @@ function AppContent() {
       <MemoryInfoModal
         visible={showInfoModal}
         memory={selectedMemoryToInspect}
+        onViewImage={(memory) => openMediaViewer(memory, 'image')}
+        onViewModel={openModelViewer}
+        onViewVideo={(memory) => openMediaViewer(memory, 'video')}
         onClose={() => {
           setShowInfoModal(false);
           setSelectedMemoryToInspect(null);
@@ -781,6 +987,7 @@ function AppContent() {
 }
 
 const styles = StyleSheet.create({
+  gestureRoot: { flex: 1 },
   devTapOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 999,
@@ -827,6 +1034,10 @@ const styles = StyleSheet.create({
 
   arScreen: { flex: 1, backgroundColor: COLORS.transparent },
   viroView: { flex: 1 },
+  modelViewerScreen: { flex: 1, backgroundColor: COLORS.background },
+  fullscreenModelViewer: { flex: 1, width: '100%', height: '100%', borderRadius: 0 },
+  modelViewerLoading: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  modelViewerHeader: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 14, zIndex: 20, elevation: 20 },
   topBar: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 14, zIndex: 20, elevation: 20 },
   topBarRow: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   topBarActions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginLeft: 8, flexShrink: 0 },

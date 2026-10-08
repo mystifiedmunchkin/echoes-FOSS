@@ -9,13 +9,20 @@ import {
 } from 'react-native';
 import { COLORS } from '../../app/theme';
 import { useI18n } from '../../constants/i18n';
-import ViroModelViewer from './ViroModelViewer';
+import { MemoryAudioControls } from './MemoryAudioControls';
 
 /**
  * Modal read-only : affiche les infos d'un souvenir existant.
  * Aucun champ de saisie, aucun POST.
  */
-export const MemoryInfoModal = ({ visible, memory, onClose }) => {
+export const MemoryInfoModal = ({
+  visible,
+  memory,
+  onClose,
+  onViewImage,
+  onViewModel,
+  onViewVideo,
+}) => {
   const { t } = useI18n();
   if (!memory) return null;
 
@@ -40,10 +47,7 @@ export const MemoryInfoModal = ({ visible, memory, onClose }) => {
             <Text style={styles.descriptionMuted}>{t('noDescription')}</Text>
           )}
 
-          {/* Modèle 3D avec Viro, sans session ARCore. */}
-          {memory.model_url && (
-            <ViroModelViewer modelUrl={memory.model_url} style={styles.modelViewer} />
-          )}
+          {!!memory.audio_url && <MemoryAudioControls source={memory.audio_url} />}
 
           {/* Métadonnées */}
           <View style={styles.metaRow}>
@@ -62,6 +66,30 @@ export const MemoryInfoModal = ({ visible, memory, onClose }) => {
           </View>
 
           <View style={styles.buttonRow}>
+            {!!memory.model_url && (
+              <TouchableOpacity
+                style={styles.modelButton}
+                onPress={() => onViewModel?.(memory)}
+              >
+                <Text style={styles.modelButtonText}>{t('viewModel')}</Text>
+              </TouchableOpacity>
+            )}
+            {!!memory.image_url && (
+              <TouchableOpacity
+                style={styles.mediaButton}
+                onPress={() => onViewImage?.(memory)}
+              >
+                <Text style={styles.modelButtonText}>{t('viewImage')}</Text>
+              </TouchableOpacity>
+            )}
+            {!!memory.video_url && (
+              <TouchableOpacity
+                style={styles.mediaButton}
+                onPress={() => onViewVideo?.(memory)}
+              >
+                <Text style={styles.modelButtonText}>{t('viewVideo')}</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={onClose}
@@ -130,9 +158,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginBottom: 16,
   },
-  modelViewer: {
-    marginBottom: 16,
-  },
   metaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -156,6 +181,7 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 10,
   },
@@ -165,6 +191,26 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flex: 1,
     alignItems: 'center',
+  },
+  modelButton: {
+    backgroundColor: COLORS.primaryStrong,
+    padding: 14,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: 'center',
+  },
+  mediaButton: {
+    backgroundColor: COLORS.primaryStrong,
+    padding: 14,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: 'center',
+  },
+  modelButtonText: {
+    color: COLORS.textOnDark,
+    fontSize: 13,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
   },
   cancelText: {
     color: COLORS.text,
