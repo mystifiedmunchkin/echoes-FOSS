@@ -32,42 +32,48 @@ function ModelScene({ modelUrl, style }: FilamentModelViewerProps) {
 
     const { center, halfExtent } = model.boundingBox;
     const radius = Math.hypot(halfExtent[0], halfExtent[1], halfExtent[2]);
-    const longestHalfExtent = Math.max(halfExtent[0], halfExtent[1], halfExtent[2]);
-    const shapeRatio = radius / Math.max(longestHalfExtent, 0.001);
-    const focalLengthInMillimeters = Math.max(
-      16,
-      55 - ((shapeRatio - 1) / (Math.sqrt(3) - 1)) * 39,
-    );
-    const distance = Math.max(radius * 5 * (focalLengthInMillimeters / 28), 0.75);
+
+    // Fit the object within a reasonable view distance based on its radius
+    const distance = Math.max(radius * 2.5, 0.5);
 
     return {
       cameraPosition: [center[0], center[1], center[2] + distance] as [number, number, number],
       cameraTarget: center,
-      far: Math.max(distance * 4, 100),
-      focalLengthInMillimeters,
-      near: Math.max(distance / 1_000, 0.01),
+      far: Math.max(distance * 10, 100),
+      focalLengthInMillimeters: 30, // Default focal length for better perspective
+      near: 0.1,
     };
   }, [model]);
   const cameraManipulator = useCameraManipulator({
     orbitHomePosition: framing.cameraPosition,
     targetPosition: framing.cameraTarget,
-    zoomSpeed: [0.02],
+    zoomSpeed: [0.2],
     orbitSpeed: [0.01, 0.01],
   });
   const rotateGesture = React.useMemo(
-    () => Gesture.Pan()
-      .onBegin((event) => {
-        'worklet';
-        cameraManipulator?.grabBegin(-event.x, -event.y, false);
-      })
-      .onUpdate((event) => {
-        'worklet';
-        cameraManipulator?.grabUpdate(-event.x, -event.y);
-      })
-      .onFinalize(() => {
-        'worklet';
-        cameraManipulator?.grabEnd();
-      }),
+    () => {
+      const pan = Gesture.Pan()
+        .onBegin((event) => {
+          'worklet';
+          cameraManipulator?.grabBegin(-event.x, -event.y, false);
+        })
+        .onUpdate((event) => {
+          'worklet';
+          cameraManipulator?.grabUpdate(-event.x, -event.y);
+        })
+        .onFinalize(() => {
+          'worklet';
+          cameraManipulator?.grabEnd();
+        });
+
+      const pinch = Gesture.Pinch()
+        .onUpdate((event) => {
+          'worklet';
+          cameraManipulator?.scroll(0, 0, (1 - event.scale) * 0.05);
+        });
+
+      return Gesture.Simultaneous(pan, pinch);
+    },
     [cameraManipulator],
   );
 
