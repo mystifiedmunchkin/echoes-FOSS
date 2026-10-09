@@ -1,5 +1,6 @@
 /** Authentication API and AsyncStorage-backed session persistence helpers. */
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { translate } from '../../constants/i18n';
 
 const API_URL = 'https://echoes.sophiehorner.art';
 const TOKEN_KEY = '@echoes_auth_token';
@@ -17,14 +18,14 @@ async function requestAuth(path, credentials, requiresToken = true) {
 
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
-    const message = payload?.message || payload?.errors?.email?.[0] || `Erreur serveur: ${response.status}`;
+    const message = payload?.message || payload?.errors?.email?.[0] || translate('serverError', { status: response.status });
     throw new Error(message);
   }
 
   const user = payload.user || payload.data || null;
   const token = payload?.token || payload?.access_token;
   if (requiresToken && !token) {
-    throw new Error(payload?.message || 'Veuillez vérifier votre adresse email avant de continuer.');
+    throw new Error(payload?.message || translate('emailVerificationRequired'));
   }
 
   if (!requiresToken) return { token: null, user, message: payload?.message };

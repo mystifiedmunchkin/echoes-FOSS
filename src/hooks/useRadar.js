@@ -7,6 +7,7 @@ import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Linking } from 'react-native';
 import { getAuthToken } from '../services/auth';
+import { translate } from '../../constants/i18n';
 
 const PRIVATE_FILES_BASE_URL = 'https://echoes.sophiehorner.art/api/private-files';
 
@@ -135,7 +136,7 @@ export function useRadar(initialRadius = 500) {
     });
     if (downloadResult.status < 200 || downloadResult.status >= 300) {
       await FileSystem.deleteAsync(localUri, { idempotent: true });
-      throw new Error(`Téléchargement du fichier refusé (${downloadResult.status})`);
+      throw new Error(translate('fileDownloadFailed', { status: downloadResult.status }));
     }
     return downloadResult.uri;
   }, []);
@@ -194,7 +195,7 @@ export function useRadar(initialRadius = 500) {
         }
       );
 
-      if (!response.ok) throw new Error(`Erreur serveur (${response.status})`);
+      if (!response.ok) throw new Error(translate('serverError', { status: response.status }));
 
       const rawData = await response.json();
       const dataArray = Array.isArray(rawData) ? rawData : (rawData.data || rawData.memories || []);
@@ -294,7 +295,7 @@ export function useRadar(initialRadius = 500) {
         return {
           ...item,
           id: item.id || index,
-          name: item.name || "Souvenir",
+          name: item.name || translate('memoryDefault'),
           creatorName: formatCreatorName(
             item.user_name,
             item.user,
@@ -326,14 +327,14 @@ export function useRadar(initialRadius = 500) {
       setMemories(formattedMemories.filter(m => !isNaN(m.lat) && !isNaN(m.lng)));
 
     } catch (err) {
-      setApiError(err.message || "Impossible de contacter le réseau");
+      setApiError(err.message || translate('networkUnavailable'));
     } finally {
       setIsLoadingApi(false);
     }
   }, []);
 
   const requestGpsPermission = useCallback(async () => {
-    // Fonction asynchronous — setState peut y être appelé
+    // This async function may call setState.
     const { status, canAskAgain } = await Location.requestForegroundPermissionsAsync();
 
     const applyError = (msg) => setErrorMsg((prev) => (prev === msg ? prev : msg));
@@ -341,8 +342,8 @@ export function useRadar(initialRadius = 500) {
     if (status !== 'granted') {
       setPermissionStatus(status);
       applyError(!canAskAgain
-        ? "Permission GPS désactivée. Veuillez l'activer dans les paramètres."
-        : "Accès GPS nécessaire pour localiser les souvenirs.");
+        ? translate('gpsPermissionDisabled')
+        : translate('gpsPermissionRequired'));
       return false;
     }
 
@@ -359,15 +360,15 @@ export function useRadar(initialRadius = 500) {
       return true;
     }
 
-    applyError("Impossible d'obtenir votre position GPS.");
+    applyError(translate('gpsLocationUnavailable'));
     return false;
   }, [fetchMemories, radius]);
 
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    // Retire le setState du corps synchron de l'effect ( satisfaite le react-hooks/set-state-in-effect )
-    // Par un microtask uniquement: 1st render = no-op, re-render 2nd = setIdle ( garNothing ).
+    // Keep setState out of the effect's synchronous body to satisfy react-hooks/set-state-in-effect.
+    // Use a microtask only: the first render is a no-op, then the second render sets the idle state.
     const handle = () => {
       requestGpsPermission();
     };

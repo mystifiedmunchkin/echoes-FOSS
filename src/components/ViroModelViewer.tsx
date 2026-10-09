@@ -15,6 +15,7 @@ import {
   ViroOrbitCamera,
   ViroScene,
 } from '@reactvision/react-viro';
+import { translate, useI18n } from '../../constants/i18n';
 
 type ModelType = 'GLB' | 'GLTF' | 'OBJ';
 
@@ -77,7 +78,7 @@ class ModelScene extends ViroScene {
           scale={[0.5, 0.5, 0.5]}
           onLoadStart={onLoadStart}
           onLoadEnd={onLoadEnd}
-          onError={(event) => onError?.(event.nativeEvent.error?.message || 'Impossible de charger le modèle 3D.')}
+          onError={(event) => onError?.(event.nativeEvent.error?.message || translate('modelLoadError'))}
         />
       </ViroScene>
     );
@@ -88,6 +89,7 @@ class ModelScene extends ViroScene {
 const initialScene = { scene: ModelScene as unknown as ViroScene };
 
 export default function ViroModelViewer({ modelUrl, style }: ViroModelViewerProps) {
+  const { t } = useI18n();
   const modelType = getModelType(modelUrl);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -100,7 +102,7 @@ export default function ViroModelViewer({ modelUrl, style }: ViroModelViewerProp
   if (!modelType) {
     return (
       <View style={[styles.container, style]}>
-        <Text style={styles.errorText}>Format de modèle 3D non pris en charge.</Text>
+        <Text style={styles.errorText}>{t('modelFormatUnsupported')}</Text>
       </View>
     );
   }
@@ -129,7 +131,7 @@ export default function ViroModelViewer({ modelUrl, style }: ViroModelViewerProp
       {isLoading && !error && (
         <View style={styles.overlay} pointerEvents="none">
           <ActivityIndicator size="small" color="#F4C95D" />
-          <Text style={styles.loadingText}>Chargement 3D...</Text>
+          <Text style={styles.loadingText}>{t('modelLoading')}</Text>
         </View>
       )}
       {error && (

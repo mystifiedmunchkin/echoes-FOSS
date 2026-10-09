@@ -4,6 +4,7 @@
  */
 import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
+import { translate } from '../../constants/i18n';
 
 const MONTAUBAN_DEFAULT = {
   latitude: 44.0223,
@@ -33,7 +34,7 @@ export const useLocation = () => {
           }
         );
       } catch (e) {
-        console.warn("GPS indisponible (environnement de test) :", e);
+        console.warn(translate('gpsTestUnavailable'), e);
       }
     }
 

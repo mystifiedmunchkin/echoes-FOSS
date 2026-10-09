@@ -1,6 +1,7 @@
 /** Persists collected-memory inventory and exposes collection actions to the UI. */
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { translate } from '../../constants/i18n';
 
 export function useInventory() {
   const [collectedMemories, setCollectedMemories] = useState([]);
@@ -12,7 +13,7 @@ export function useInventory() {
         const stored = await AsyncStorage.getItem('@collected_memories');
         if (stored) setCollectedMemories(JSON.parse(stored));
       } catch (e) {
-        console.error("Erreur chargement collection", e);
+        console.error(translate('collectionLoadError'), e);
       }
     }
     loadStoredMemories();
@@ -24,7 +25,7 @@ export function useInventory() {
       const updatedCollection = [...collectedMemories, { ...memoryData, collectedAt: new Date().toISOString() }];
       setCollectedMemories(updatedCollection);
       await AsyncStorage.setItem('@collected_memories', JSON.stringify(updatedCollection));
-      alert(`🎉 Souvenir "${memoryData.name}" ajouté à votre collection !`);
+      alert(translate('memoryAdded', { name: memoryData.name }));
     }
   };
 

@@ -1,6 +1,7 @@
 /** Loads and mutates the persisted authenticated user session. */
 import { useEffect, useState } from 'react';
 import { getAuthToken, getStoredUser, login, logout, register } from '../services/auth';
+import { translate } from '../../constants/i18n';
 
 export function useAuth() {
   const [token, setToken] = useState(null);
@@ -13,7 +14,7 @@ export function useAuth() {
         setToken(storedToken);
         setUser(storedUser);
       })
-      .catch((error) => console.error('Erreur chargement session', error))
+      .catch((error) => console.error(translate('sessionLoadError'), error))
       .finally(() => setIsLoading(false));
   }, []);
 

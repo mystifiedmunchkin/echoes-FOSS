@@ -154,7 +154,7 @@
 //             <View style={[styles.markerContainer, styles.creationMarkerContainer]}>
 //               <View style={[styles.markerDot, styles.creationMarkerDot]} />
 //             </View>
-//             <MaplibreGL.Callout title="Nouveau souvenir" />
+//             <MaplibreGL.Callout title="New memory" />
 //           </MaplibreGL.PointAnnotation>
 //         )}
 //       </MaplibreGL.MapView>

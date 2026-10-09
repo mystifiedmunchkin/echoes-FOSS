@@ -58,7 +58,7 @@ export default function App() {
 }
 
 function AppContent() {
-  // --- display and strings
+  // --- Display and localized strings ---
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
 
@@ -101,11 +101,11 @@ function AppContent() {
   useEffect(() => {
     if (isProblematicARDevice()) {
       Alert.alert(
-        "Mode Appareil Samsung",
-        "Pour garantir une stabilité parfaite et éviter les scintillements liés aux bugs matériels de l'appareil, l'application démarre directement sur la Carte et le Visualiseur 3D (le mode AR caméra est désactivé sur cet appareil)."
+        t('samsungDeviceMode'),
+        t('samsungDeviceDescription'),
       );
     }
-  }, []);
+  }, [t]);
 
   const [arSessionMemories, setArSessionMemories] = useState([]);
   const [isPlacingMode, setIsPlacingMode] = useState(false);
@@ -146,7 +146,7 @@ function AppContent() {
       })
       .catch((error) => {
         if (isCurrentSelection) {
-          console.warn('Impossible de préparer les médias du souvenir', error);
+          console.warn(t('mediaPreparationError'), error);
         }
       });
 
@@ -267,11 +267,11 @@ function AppContent() {
     }, MODEL_VIEWER_RELEASE_MS);
   }, [mediaViewer]);
 
-  // --- Mode creation de souvenir depuis la vue AR ---
+  // --- Memory creation mode from the AR view ---
   const [isCreatingInAR, setIsCreatingInAR] = useState(false);
 
 
-  // --- Fermeture de la caméra AR ---
+  // --- AR camera closure ---
   //// TODO :  maybe this needs looking at closely to get the correct order of instructions (buggy?)
   const closeARCamera = useCallback(() => {
     lastARCloseAt.current = Date.now();
@@ -286,12 +286,12 @@ function AppContent() {
     setActiveParticle(null);
   }, []);
 
-  // --- Ouverture de la caméra AR ---
+  // --- AR camera opening ---
   const openARCamera = useCallback(() => {
     if (isProblematicARDevice()) {
       Alert.alert(
-        "Mode AR non disponible",
-        "Pour garantir une expérience stable sans scintillement sur votre appareil Samsung, l'application utilise le mode Carte, Radar et Visualiseur 3D."
+        t('arUnavailable'),
+        t('arUnavailableDescription'),
       );
       return false;
     }
@@ -331,7 +331,7 @@ function AppContent() {
       })
       .filter(({ distanceMeters }) => distanceMeters <= Math.min(radius, AR_MEMORY_MAX_RADIUS_METERS))
       .sort((left, right) => left.distanceMeters - right.distanceMeters));
-    // Set the memories to chose from during AR session
+    // Set the memories to choose from during the AR session.
     setArSessionMemories(sessionMemories);
     setCameraKey((prev) => prev + 1);
     setShowCamera(true);
@@ -345,11 +345,11 @@ function AppContent() {
       try {
         res = await requestCameraPermission();
       } catch (error) {
-        console.error('Erreur de demande de permission camera', error);
+        console.error(t('cameraPermissionRequestError'), error);
         Alert.alert(t('error'), t('cameraError'));
         return;
       }
-      if (!res.granted) return alert('Accès à la caméra refusé.');
+      if (!res.granted) return alert(t('cameraPermissionDenied'));
     }
 
     if (!location) {
@@ -427,7 +427,7 @@ function AppContent() {
     });
   }, [arMemories]);
 
-  // Action pour replacer depuis l'inventaire
+  // Replace a memory from the inventory.
   const handleReplaceFromInventory = async (memory) => {
     setShowInventory(false);
     const sourceMemory = memories.find((item) => String(item.id) === String(memory.id));
@@ -480,12 +480,12 @@ function AppContent() {
     const { id, name, screenX, screenY } = event;
     const collectedMemory = memories.find((memory) => String(memory.id) === String(id));
 
-    // 1. Declenche l'animation visuelle
+    // 1. Trigger the visual animation.
     if (screenX && screenY) {
       setActiveParticle({ x: screenX, y: screenY });
     }
 
-    // 2. Enregistre dans l'inventaire
+    // 2. Save the memory in the inventory.
     handleCollectMemory({
       id,
       name,
@@ -493,7 +493,7 @@ function AppContent() {
     });
   };
 
-  // // --- ECRAN D'ERREUR / PERMISSION ---
+  // // --- Error and permission screen ---
   // if (!location) {
   //   return (
   //     <View style={styles.loadingContainer}>
@@ -513,7 +513,7 @@ function AppContent() {
   //   );
   // }
 
-  // --- VUE CAMERA (RA) ---
+  // --- AR camera view ---
   if (isPreparingModelViewer || modelViewerMemory) {
     return (
       <View style={styles.modelViewerScreen} collapsable={false}>
@@ -607,7 +607,7 @@ function AppContent() {
           />
         </React.Suspense>
 
-        {/* Particule animee superposee lors de la collecte */}
+        {/* Animated particle overlaid when a memory is collected. */}
         {activeParticle && (
           <CollectionParticle
             startX={activeParticle.x}
@@ -642,7 +642,7 @@ function AppContent() {
                   setShowAccount(true);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel="Ouvrir le compte"
+                accessibilityLabel={t('openAccount')}
               >
                 <Text style={styles.accountButtonText}>{user ? t('account') : t('signIn')}</Text>
               </TouchableOpacity>
@@ -650,7 +650,7 @@ function AppContent() {
                 style={styles.backButtonHeader}
                 onPress={closeARCamera}
                 accessibilityRole="button"
-                accessibilityLabel="Fermer la caméra"
+                accessibilityLabel={t('closeCamera')}
               >
                 <Text style={styles.backButtonText}>&#x2715;</Text>
               </TouchableOpacity>
@@ -718,7 +718,7 @@ function AppContent() {
             }}
             disabled={isPlacingMode || isCreatingInAR}
           >
-            <Text style={styles.bottomActionText}>+ CREATE</Text>
+            <Text style={styles.bottomActionText}>+ {t('createMemory')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.bottomAction, (!arMemoryToPlace || isPlacingMode || isCreatingInAR || isPreparingPlacement) && styles.disabledAction]}
@@ -735,7 +735,7 @@ function AppContent() {
               setShowInventory(true);
             }}
             accessibilityRole="button"
-            accessibilityLabel="Ouvrir la collection"
+            accessibilityLabel={t('openCollection')}
           >
             <Text style={styles.bottomActionText}>{t('collection')} ({collectedMemories.length})</Text>
           </TouchableOpacity>
@@ -764,7 +764,7 @@ function AppContent() {
   }
 
 
-  // --- VUE CARTE (DEFAULT) ---
+  // --- Default map view ---
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -882,7 +882,7 @@ function AppContent() {
         )}
       </MapLibreMap>
 
-      {/* ELEMENTS UI SUPERPOSES (Sortis de MapView) */}
+      {/* Overlay UI elements outside MapView. */}
       {selectedCreationCoords && (
         <TouchableOpacity
           style={[
@@ -906,7 +906,7 @@ function AppContent() {
         </TouchableOpacity>
       )}
 
-      {/* Modale de creation */}
+      {/* Creation modal. */}
       <CreateMemoryModal
         visible={showCreateModal}
         currentLocation={selectedCreationCoords}

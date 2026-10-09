@@ -1,6 +1,6 @@
 /** French and English UI strings with device-locale selection. */
 import { getLocales } from 'expo-localization';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 const translations = {
   fr: {
@@ -94,6 +94,49 @@ const translations = {
     saveMemoryError: "Impossible d’enregistrer le souvenir.",
     accountCreated: 'Compte créé',
     verificationSent: 'Consultez votre boîte mail pour vérifier votre adresse avant de vous connecter.',
+    samsungDeviceMode: 'Mode appareil Samsung',
+    samsungDeviceDescription: 'Pour garantir une stabilité parfaite et éviter les scintillements liés aux bugs matériels de l’appareil, l’application démarre directement sur la carte et le visualiseur 3D. Le mode caméra AR est désactivé sur cet appareil.',
+    arUnavailable: 'Mode AR non disponible',
+    arUnavailableDescription: 'Pour garantir une expérience stable sans scintillement sur votre appareil Samsung, l’application utilise le mode carte, radar et visualiseur 3D.',
+    openAccount: 'Ouvrir le compte',
+    closeAccount: 'Fermer le compte',
+    closeCamera: 'Fermer la caméra',
+    openCollection: 'Ouvrir la collection',
+    cameraPermissionDenied: 'Accès à la caméra refusé.',
+    connectedAccount: 'Compte connecté',
+    accountMemoryAssociation: 'Vos souvenirs pourront être associés à votre compte.',
+    signOut: 'SE DÉCONNECTER',
+    signOutError: 'Déconnexion impossible',
+    signInError: 'Connexion impossible',
+    emailPasswordRequired: 'Veuillez renseigner votre email et votre mot de passe.',
+    passwordsMismatch: 'Les mots de passe ne correspondent pas.',
+    alreadyHaveAccount: 'J’ai déjà un compte',
+    usernameInfoAccessibility: 'Informations sur le nom d’utilisateur',
+    modelFormatUnsupported: 'Format de modèle 3D non pris en charge.',
+    modelLoading: 'Chargement 3D...',
+    serverError: 'Erreur serveur : {{status}}',
+    emailVerificationRequired: 'Veuillez vérifier votre adresse email avant de continuer.',
+    networkUnavailable: 'Impossible de contacter le réseau',
+    gpsPermissionDisabled: 'Permission GPS désactivée. Veuillez l’activer dans les paramètres.',
+    gpsPermissionRequired: 'Accès GPS nécessaire pour localiser les souvenirs.',
+    gpsLocationUnavailable: 'Impossible d’obtenir votre position GPS.',
+    fileDownloadFailed: 'Téléchargement du fichier refusé ({{status}})',
+    memoryAdded: '🎉 Souvenir "{{name}}" ajouté à votre collection !',
+    audioConfigurationError: 'Impossible de configurer le son du souvenir',
+    audioPlaybackError: 'Impossible de lire le média audio du souvenir',
+    mediaPreparationError: 'Impossible de préparer les médias du souvenir',
+    cameraPermissionRequestError: 'Erreur de demande de permission caméra',
+    collectionLoadError: 'Erreur de chargement de la collection',
+    sessionLoadError: 'Erreur de chargement de session',
+    gpsTestUnavailable: 'GPS indisponible (environnement de test)',
+    memoryCreationError: 'Erreur lors de la création du souvenir',
+    serverValidationError: 'Erreur de validation du serveur',
+    localModelMissing: 'Le modèle 3D local est introuvable.',
+    modelUrlInvalid: 'URL de modèle invalide : {{url}}',
+    modelInvalidProtocol: 'Le modèle doit avoir une URL HTTP(S) ou un URI de fichier : {{url}}',
+    modelDownloadError: 'Erreur de téléchargement du modèle {{url}}',
+    audioRecordingStopError: 'Impossible d’arrêter l’enregistrement audio',
+    memoryDefault: 'Souvenir',
   },
   en: {
     account: 'Account',
@@ -186,6 +229,49 @@ const translations = {
     saveMemoryError: 'Unable to save the memory.',
     accountCreated: 'Account created',
     verificationSent: 'Check your inbox to verify your address before signing in.',
+    samsungDeviceMode: 'Samsung device mode',
+    samsungDeviceDescription: 'To guarantee stability and avoid flickering caused by device hardware issues, the app starts directly in map and 3D viewer mode. AR camera mode is disabled on this device.',
+    arUnavailable: 'AR mode unavailable',
+    arUnavailableDescription: 'To ensure a stable, flicker-free experience on your Samsung device, the app uses map, radar, and 3D viewer modes.',
+    openAccount: 'Open account',
+    closeAccount: 'Close account',
+    closeCamera: 'Close camera',
+    openCollection: 'Open collection',
+    cameraPermissionDenied: 'Camera access denied.',
+    connectedAccount: 'Signed-in account',
+    accountMemoryAssociation: 'Your memories can be associated with your account.',
+    signOut: 'SIGN OUT',
+    signOutError: 'Unable to sign out',
+    signInError: 'Unable to sign in',
+    emailPasswordRequired: 'Please enter your email and password.',
+    passwordsMismatch: 'Passwords do not match.',
+    alreadyHaveAccount: 'I already have an account',
+    usernameInfoAccessibility: 'Username information',
+    modelFormatUnsupported: 'Unsupported 3D model format.',
+    modelLoading: 'Loading 3D...',
+    serverError: 'Server error: {{status}}',
+    emailVerificationRequired: 'Please verify your email address before continuing.',
+    networkUnavailable: 'Unable to reach the network',
+    gpsPermissionDisabled: 'GPS permission is disabled. Please enable it in settings.',
+    gpsPermissionRequired: 'GPS access is required to locate memories.',
+    gpsLocationUnavailable: 'Unable to get your GPS location.',
+    fileDownloadFailed: 'File download was rejected ({{status}})',
+    memoryAdded: '🎉 Memory "{{name}}" was added to your collection!',
+    audioConfigurationError: 'Unable to configure memory audio',
+    audioPlaybackError: 'Unable to play memory audio',
+    mediaPreparationError: 'Unable to prepare memory media',
+    cameraPermissionRequestError: 'Error requesting camera permission',
+    collectionLoadError: 'Error loading collection',
+    sessionLoadError: 'Error loading session',
+    gpsTestUnavailable: 'GPS unavailable (test environment)',
+    memoryCreationError: 'Error creating memory',
+    serverValidationError: 'Server validation error',
+    localModelMissing: 'Local 3D model could not be found.',
+    modelUrlInvalid: 'Invalid model URL: {{url}}',
+    modelInvalidProtocol: 'The model must have an HTTP(S) URL or file URI: {{url}}',
+    modelDownloadError: 'Error downloading model {{url}}',
+    audioRecordingStopError: 'Unable to stop audio recording',
+    memoryDefault: 'Memory',
   },
 };
 
@@ -194,12 +280,21 @@ const getDeviceLanguage = () => {
   return languageCode === 'en' ? 'en' : 'fr';
 };
 
+export const translate = (key, variables = {}) => {
+  const language = getDeviceLanguage();
+  const message = translations[language][key] || translations.fr[key] || key;
+  return message.replace(/\{\{(\w+)\}\}/g, (_, variable) => String(variables[variable] ?? ''));
+};
+
 export const useI18n = () => {
   const language = useMemo(() => getDeviceLanguage(), []);
-  const messages = translations[language];
+  const t = useCallback((key, variables = {}) => {
+    const message = translations[language][key] || translations.fr[key] || key;
+    return message.replace(/\{\{(\w+)\}\}/g, (_, variable) => String(variables?.[variable] ?? ''));
+  }, [language]);
 
   return {
     language,
-    t: (key) => messages[key] || translations.fr[key] || key,
+    t,
   };
 };

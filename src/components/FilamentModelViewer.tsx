@@ -10,6 +10,7 @@ import {
   useCameraManipulator,
   useModel,
 } from 'react-native-filament';
+import { useI18n } from '../../constants/i18n';
 
 type FilamentModelViewerProps = {
   modelUrl: string;
@@ -87,10 +88,11 @@ function ModelScene({ modelUrl, style }: FilamentModelViewerProps) {
 }
 
 export default function FilamentModelViewer({ modelUrl, style }: FilamentModelViewerProps) {
+  const { t } = useI18n();
   if (!/\.glb(\?|$)/i.test(modelUrl)) {
     return (
       <View style={[styles.container, style]}>
-        <Text style={styles.errorText}>Format de modele 3D non pris en charge.</Text>
+        <Text style={styles.errorText}>{t('modelFormatUnsupported')}</Text>
       </View>
     );
   }

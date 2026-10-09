@@ -22,7 +22,7 @@ export function AccountModal({ visible, onClose, user, onSignIn, onSignUp, onSig
       await onSignOut();
       onClose();
     } catch (error) {
-      Alert.alert('Déconnexion impossible', error.message);
+      Alert.alert(t('signOutError'), error.message);
     } finally {
       setSigningOut(false);
     }
@@ -30,11 +30,11 @@ export function AccountModal({ visible, onClose, user, onSignIn, onSignUp, onSig
 
   const submit = async () => {
     if (!email.trim() || !password) {
-      Alert.alert('Erreur', 'Veuillez renseigner votre email et votre mot de passe.');
+      Alert.alert(t('error'), t('emailPasswordRequired'));
       return;
     }
     if (isRegistering && password !== confirmPassword) {
-      Alert.alert('Erreur', 'Les mots de passe ne correspondent pas.');
+      Alert.alert(t('error'), t('passwordsMismatch'));
       return;
     }
     setLoading(true);
@@ -57,7 +57,7 @@ export function AccountModal({ visible, onClose, user, onSignIn, onSignUp, onSig
       setConfirmPassword('');
       if (!isRegistering) onClose();
     } catch (error) {
-      Alert.alert('Connexion impossible', error.message);
+      Alert.alert(t('signInError'), error.message);
     } finally {
       setLoading(false);
     }
@@ -69,22 +69,22 @@ export function AccountModal({ visible, onClose, user, onSignIn, onSignUp, onSig
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.title}>{user ? t('account').toUpperCase() : isRegistering ? t('createAccount') : t('signIn').toUpperCase()}</Text>
-            <TouchableOpacity onPress={onClose} accessibilityLabel="Fermer le compte">
+            <TouchableOpacity onPress={onClose} accessibilityLabel={t('closeAccount')}>
               <Text style={styles.close}>X</Text>
             </TouchableOpacity>
           </View>
           {user ? (
             <>
-              <Text style={styles.welcome}>{user.name || user.email || 'Compte connecté'}</Text>
-              <Text style={styles.description}>Vos souvenirs pourront être associés à votre compte.</Text>
+              <Text style={styles.welcome}>{user.name || user.email || t('connectedAccount')}</Text>
+              <Text style={styles.description}>{t('accountMemoryAssociation')}</Text>
               <TouchableOpacity
                 style={styles.submit}
                 onPress={handleSignOut}
                 disabled={signingOut}
                 accessibilityRole="button"
-                accessibilityLabel="Se déconnecter"
+                accessibilityLabel={t('signOut')}
               >
-                {signingOut ? <ActivityIndicator color={COLORS.background} /> : <Text style={styles.submitText}>SE DECONNECTER</Text>}
+                {signingOut ? <ActivityIndicator color={COLORS.background} /> : <Text style={styles.submitText}>{t('signOut')}</Text>}
               </TouchableOpacity>
             </>
           ) : (
@@ -100,7 +100,7 @@ export function AccountModal({ visible, onClose, user, onSignIn, onSignUp, onSig
                         t('usernameInfo'),
                       )}
                       accessibilityRole="button"
-                      accessibilityLabel="Informations sur le nom d’utilisateur"
+                      accessibilityLabel={t('usernameInfoAccessibility')}
                     >
                       <Text style={styles.infoText}>(i)</Text>
                     </TouchableOpacity>
@@ -135,7 +135,7 @@ export function AccountModal({ visible, onClose, user, onSignIn, onSignUp, onSig
                   setConfirmPassword('');
                 }}
               >
-                <Text style={styles.switchText}>{isRegistering ? 'J’ai déjà un compte' : t('signUp')}</Text>
+                <Text style={styles.switchText}>{isRegistering ? t('alreadyHaveAccount') : t('signUp')}</Text>
               </TouchableOpacity>
             </>
           )}

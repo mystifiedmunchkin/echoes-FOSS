@@ -47,9 +47,8 @@ export default function CollectionParticle({ startX, startY, onAnimationEnd }) {
     ]).start(() => {
       if (onAnimationEnd) onAnimationEnd();
     });
-    // Animation à feu unique au montage du composant.
-    // Intentionnellement sans dépendance : posX/posY/scale/opacity sont stables
-    // (useState(() => ...)), onAnimationEnd vient du parent (stable).
+    // Run the animation once on mount.
+    // Dependencies are intentionally omitted because the values and parent callback are stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

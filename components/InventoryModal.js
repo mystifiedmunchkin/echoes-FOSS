@@ -27,7 +27,7 @@ export default function InventoryModal({ visible, onClose, items, onClear, onRep
       </View>
 
       <View style={styles.actionsRow}>
-        {/* Bouton pour réinvoquer l'objet dans le monde réel */}
+        {/* Button for returning the object to the real world. */}
         <TouchableOpacity
           style={styles.replaceButton}
           onPress={() => onReplace && onReplace(item)}
@@ -47,7 +47,7 @@ export default function InventoryModal({ visible, onClose, items, onClear, onRep
     >
       <SafeAreaView style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          {/* Entête Modale */}
+          {/* Modal header. */}
           <View style={styles.topHeader}>
             <Text style={styles.title}>🎒 {t('collection').toUpperCase()} ({items.length})</Text>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -55,7 +55,7 @@ export default function InventoryModal({ visible, onClose, items, onClear, onRep
             </TouchableOpacity>
           </View>
 
-          {/* Liste des objets collectés */}
+          {/* Collected objects list. */}
           {items.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>{t('emptyCollection')}</Text>
@@ -72,7 +72,7 @@ export default function InventoryModal({ visible, onClose, items, onClear, onRep
             />
           )}
 
-          {/* Pied de page avec bouton pour vider */}
+          {/* Footer with the clear button. */}
           {items.length > 0 && (
             <TouchableOpacity style={styles.clearButton} onPress={onClear}>
               <Text style={styles.clearButtonText}>{t('clearCollection')}</Text>

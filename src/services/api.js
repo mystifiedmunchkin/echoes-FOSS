@@ -1,6 +1,7 @@
 /** HTTP client for creating memories and uploading their optional media payloads. */
 import { getAuthToken } from './auth';
 import { File } from 'expo-file-system';
+import { translate } from '../../constants/i18n';
 
 const API_URL = 'https://echoes.sophiehorner.art/api';
 
@@ -79,7 +80,7 @@ export const createMemory = async (memoryData) => {
 
     if (!response.ok) {
       const errorDetails = await response.json().catch(() => null);
-      console.error('Laravel Server Validation Error:', errorDetails);
+      console.error(translate('serverValidationError'), errorDetails);
       if (response.status === 401) {
         const error = new Error('AUTH_REQUIRED');
         error.code = 'AUTH_REQUIRED';
@@ -87,13 +88,13 @@ export const createMemory = async (memoryData) => {
       }
       const validationMessage = errorDetails?.message
         || Object.values(errorDetails?.errors || {}).flat()?.[0]
-        || `Erreur serveur: ${response.status}`;
+        || translate('serverError', { status: response.status });
       throw new Error(validationMessage);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Erreur lors de la création du souvenir:', error);
+    console.error(translate('memoryCreationError'), error);
     throw error;
   }
 };

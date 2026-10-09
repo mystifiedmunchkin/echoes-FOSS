@@ -1,6 +1,7 @@
 /** Configures and plays the selected memory's audio without rendering UI. */
 import { useEffect } from 'react';
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
+import { translate } from '../../constants/i18n';
 
 export function MemoryAudioPlayer({ source }) {
   const player = useAudioPlayer(source || null);
@@ -9,7 +10,7 @@ export function MemoryAudioPlayer({ source }) {
     setAudioModeAsync({
       playsInSilentMode: true,
       interruptionMode: 'mixWithOthers',
-    }).catch((error) => console.warn('Impossible de configurer le son du souvenir', error));
+    }).catch((error) => console.warn(translate('audioConfigurationError'), error));
   }, []);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ export function MemoryAudioPlayer({ source }) {
     try {
       player.play();
     } catch (error) {
-      console.warn('Impossible de lire le média audio du souvenir', error);
+      console.warn(translate('audioPlaybackError'), error);
     }
 
     return () => player.pause();

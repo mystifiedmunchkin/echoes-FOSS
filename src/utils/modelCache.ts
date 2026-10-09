@@ -1,5 +1,6 @@
 /** Legacy Expo FileSystem model-cache helper, retained outside the active radar cache path. */
 import { Paths, File, Directory } from 'expo-file-system';
+import { translate } from '../../constants/i18n';
 
 export async function getLocalModelUri(remoteUrl: string): Promise<string> {
   const modelUrl = remoteUrl.trim();
@@ -10,12 +11,12 @@ export async function getLocalModelUri(remoteUrl: string): Promise<string> {
   try {
     parsedUrl = new URL(modelUrl);
   } catch (error) {
-    console.error(`URL de modele invalide: ${modelUrl}`, error);
+    console.error(translate('modelUrlInvalid', { url: modelUrl }), error);
     return '';
   }
 
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-    console.error(`Le modele doit avoir une URL HTTP(S) ou un URI de fichier: ${modelUrl}`);
+    console.error(translate('modelInvalidProtocol', { url: modelUrl }));
     return '';
   }
 
@@ -37,7 +38,7 @@ export async function getLocalModelUri(remoteUrl: string): Promise<string> {
     const downloadedFile = await File.downloadFileAsync(parsedUrl.href, targetFile);
     return downloadedFile.uri;
   } catch (error) {
-    console.error(`Erreur de telechargement du modele ${modelUrl}:`, error);
+    console.error(translate('modelDownloadError', { url: modelUrl }), error);
     return modelUrl;
   }
 }

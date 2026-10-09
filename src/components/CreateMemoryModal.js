@@ -133,13 +133,13 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
     if (visible) return;
 
     stopActiveRecording(false).catch((error) => {
-      console.warn('Impossible d’arrêter l’enregistrement audio', error);
+      console.warn(t('audioRecordingStopError'), error);
     });
   }, [stopActiveRecording, visible]);
 
   useEffect(() => () => {
     stopActiveRecording(false).catch((error) => {
-      console.warn('Impossible d’arrêter l’enregistrement audio', error);
+      console.warn(t('audioRecordingStopError'), error);
     });
   }, [stopActiveRecording]);
 
@@ -170,7 +170,7 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
         : await compressCapturedImage(asset);
       setSelectedMedia(normalizedAsset);
     } catch (error) {
-      console.error('Impossible de compresser le média capturé', error);
+      console.error(t('mediaCompressionError'), error);
       Alert.alert(t('error'), t('mediaCompressionError'));
     } finally {
       setLoading(false);
@@ -185,7 +185,7 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
     try {
       const asset = Asset.fromModule(model.source);
       await asset.downloadAsync();
-      if (!asset.localUri) throw new Error('Le modèle 3D local est introuvable.');
+      if (!asset.localUri) throw new Error(t('localModelMissing'));
 
       setSelectedMedia({
         uri: asset.localUri,
@@ -196,7 +196,7 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
       });
       setShowModelChoices(false);
     } catch (error) {
-      console.error('Impossible de préparer le modèle 3D', error);
+      console.error(t('modelPreparationError'), error);
       Alert.alert(t('error'), t('modelPreparationError'));
     } finally {
       setLoading(false);

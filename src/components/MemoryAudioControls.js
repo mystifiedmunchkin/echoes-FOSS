@@ -25,7 +25,7 @@ export function MemoryAudioControls({ source }) {
     setAudioModeAsync({
       playsInSilentMode: true,
       interruptionMode: 'mixWithOthers',
-    }).catch((error) => console.warn('Impossible de configurer le son du souvenir', error));
+    }).catch((error) => console.warn(t('audioConfigurationError'), error));
   }, [player]);
 
   return (
@@ -42,7 +42,7 @@ export function MemoryAudioControls({ source }) {
               if (status.playing) player.pause();
               else player.play();
             } catch (error) {
-              console.warn('Impossible de lire le média audio du souvenir', error);
+              console.warn(t('audioPlaybackError'), error);
             }
           }}
           accessibilityRole="button"

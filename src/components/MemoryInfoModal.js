@@ -12,8 +12,8 @@ import { useI18n } from '../../constants/i18n';
 import { MemoryAudioControls } from './MemoryAudioControls';
 
 /**
- * Modal read-only : affiche les infos d'un souvenir existant.
- * Aucun champ de saisie, aucun POST.
+ * Read-only modal displaying an existing memory's details.
+ * It contains no input fields and submits no POST requests.
  */
 export const MemoryInfoModal = ({
   visible,
@@ -33,14 +33,14 @@ export const MemoryInfoModal = ({
           <Text style={styles.title}>{memory.name}</Text>
           {!!memory.creatorName && <Text style={styles.creatorName}>{memory.creatorName}</Text>}
 
-          {/* Badge collectible */}
+          {/* Collectible badge. */}
           {memory.is_collectible && (
             <View style={styles.collectibleBadge}>
               <Text style={styles.collectibleText}>✦ {t('collectible')}</Text>
             </View>
           )}
 
-          {/* Description */}
+          {/* Description. */}
           {memory.description ? (
             <Text style={styles.description}>{memory.description}</Text>
           ) : (
@@ -49,7 +49,7 @@ export const MemoryInfoModal = ({
 
           {!!memory.audio_url && <MemoryAudioControls source={memory.audio_url} />}
 
-          {/* Métadonnées */}
+          {/* Metadata. */}
           <View style={styles.metaRow}>
             <View style={styles.metaCell}>
               <Text style={styles.metaLabel}>{t('memoryId')}</Text>
