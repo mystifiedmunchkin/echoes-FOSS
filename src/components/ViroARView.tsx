@@ -56,22 +56,14 @@ function MemoryARScene({ sceneNavigator }: MemoryARSceneProps) {
       <ViroAmbientLight color="#FFFFFF" intensity={500} />
       <ViroDirectionalLight color="#FFFFFF" direction={[0, -1, -0.5]} intensity={800} />
 
-      {/* Plane selector allows users to tap and place on detected surfaces */}
-      <ViroARPlaneSelector
-        alignment="Horizontal"
-        minHeight={0.1}
-        minWidth={0.1}
-        onPlaneUpdated={(anchor) => {
-          console.log(`[AR Plane] Updated: ${anchor.anchorId}, W=${anchor.width}, H=${anchor.height}`);
-        }}
+      {/* Try to use hitTest on the scene level for point/depth based placement */}
+      <ViroNode
         onClick={(position) => {
-          console.log(`[AR Click] Position: ${JSON.stringify(position)}`);
+          console.log(`[AR Click] Depth/Point hit: ${JSON.stringify(position)}`);
         }}
       >
-        <ViroNode>
-           <ViroText text="Plane Detected" color="#00FF00" scale={[0.2, 0.2, 0.2]} position={[0, 0.1, 0]} />
-        </ViroNode>
-      </ViroARPlaneSelector>
+        <ViroText text="Tap surface (Depth/Points)" color="#FF0000" scale={[0.2, 0.2, 0.2]} position={[0, 0, -1]} />
+      </ViroNode>
     </ViroARScene>
   );
 }

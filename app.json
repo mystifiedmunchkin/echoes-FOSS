@@ -1,8 +1,8 @@
 {
   "expo": {
     "newArchEnabled": true,
-    "name": "ECHOES",
-    "slug": "echoes-mobile",
+    "name": "echoes",
+    "slug": "echoes",
     "scheme": "echoes",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -31,7 +31,7 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "package": "com.sophiehorner.echoesmobile",
+      "package": "com.sophiehorner.echoes",
       "predictiveBackGestureEnabled": false
     },
     "web": {

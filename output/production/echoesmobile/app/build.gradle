@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.sophiehorner.echoes'
+    namespace 'com.sophiehorner.echoesmobile'
     defaultConfig {
-        applicationId 'com.sophiehorner.echoes'
+        applicationId 'com.sophiehorner.echoesmobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -1,4 +1,4 @@
-package com.sophiehorner.echoesmobile
+package com.sophiehorner.echoes
 import com.viromedia.bridge.ReactViroPackage
 
 import android.app.Application

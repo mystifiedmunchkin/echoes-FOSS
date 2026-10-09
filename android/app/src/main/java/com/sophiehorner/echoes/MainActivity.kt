@@ -1,4 +1,4 @@
-package com.sophiehorner.echoesmobile
+package com.sophiehorner.echoes
 
 import android.os.Build
 import android.os.Bundle
