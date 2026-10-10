@@ -1,5 +1,5 @@
 /** French and English UI strings with device-locale selection. */
-import { getLocales } from 'expo-localization';
+import { getLocales } from 'react-native-localize';
 import { useCallback, useMemo } from 'react';
 
 const translations = {

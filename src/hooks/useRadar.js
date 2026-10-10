@@ -3,8 +3,8 @@
  * It supplies map/radar data only; AR rendering uses local plane coordinates.
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import * as FileSystem from 'expo-file-system/legacy';
 import { Linking } from 'react-native';
+import { Dirs, FileSystem } from 'react-native-file-access';
 import { getAuthToken } from '../services/auth';
 import * as Location from '../services/geolocation';
 import { translate } from '../../constants/i18n';
@@ -125,20 +125,22 @@ export function useRadar(initialRadius = 500) {
   const cacheRemoteAsset = useCallback(async (remoteUrl, fileName, token) => {
     if (!isRemoteUrl(remoteUrl)) return remoteUrl;
 
-    const cacheDirectory = `${FileSystem.documentDirectory}memory-assets/`;
-    await FileSystem.makeDirectoryAsync(cacheDirectory, { intermediates: true });
-    const localUri = `${cacheDirectory}${fileName}`;
-    const fileInfo = await FileSystem.getInfoAsync(localUri);
-    if (fileInfo.exists) return fileInfo.uri;
+    const cacheDirectory = `${Dirs.DocumentDir}/memory-assets`;
+    if (!(await FileSystem.exists(cacheDirectory))) {
+      await FileSystem.mkdir(cacheDirectory);
+    }
+    const localUri = `${cacheDirectory}/${fileName}`;
+    if (await FileSystem.exists(localUri)) return `file://${localUri}`;
 
-    const downloadResult = await FileSystem.downloadAsync(remoteUrl, localUri, {
+    const downloadResult = await FileSystem.fetch(remoteUrl, {
+      path: localUri,
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     if (downloadResult.status < 200 || downloadResult.status >= 300) {
-      await FileSystem.deleteAsync(localUri, { idempotent: true });
+      if (await FileSystem.exists(localUri)) await FileSystem.unlink(localUri);
       throw new Error(translate('fileDownloadFailed', { status: downloadResult.status }));
     }
-    return downloadResult.uri;
+    return `file://${localUri}`;
   }, []);
 
   const cacheMemoryAssets = useCallback(async (memory) => {

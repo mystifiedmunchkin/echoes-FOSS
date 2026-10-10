@@ -1,6 +1,5 @@
 /** HTTP client for creating memories and uploading their optional media payloads. */
 import { getAuthToken } from './auth';
-import { File } from 'expo-file-system';
 import { translate } from '../../constants/i18n';
 
 const API_URL = 'https://echoes.sophiehorner.art/api';
@@ -62,8 +61,11 @@ export const createMemory = async (memoryData) => {
 
         const fileName = String(asset.fileName || `${mediaType}_${Date.now()}.${fallbackExtension}`)
           .replace(/[^a-zA-Z0-9._-]/g, '_');
-        const file = new File(uri);
-        formData.append(`contents[${index}][${mediaType}]`, file, fileName);
+        formData.append(`contents[${index}][${mediaType}]`, {
+          uri,
+          name: fileName,
+          type: asset.mimeType || `${mediaType}/${fallbackExtension}`,
+        });
       });
 
       if (audioUrl) formData.append('contents[0][audio]', audioUrl);

@@ -8,18 +8,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert
+  Alert,
+  Image,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import {
-  AudioModule,
-  RecordingPresets,
-  setAudioModeAsync,
-  useAudioRecorder,
-  useAudioRecorderState,
-} from 'expo-audio';
-import * as ImageManipulator from 'expo-image-manipulator';
-import { Asset } from 'expo-asset';
+import { Camera as VisionCamera } from 'react-native-vision-camera';
+import { launchCamera } from 'react-native-image-picker';
+import ImageResizer from '@bam.tech/react-native-image-resizer';
+import Sound from 'react-native-nitro-sound';
 import { Video } from 'react-native-compressor';
 import { createMemory } from '../services/api';
 import { COLORS } from '../../app/theme';
@@ -56,14 +51,12 @@ const compressCapturedImage = async (asset) => {
     : 1;
   const width = Number(asset.width || 0) > 0 ? Math.round(asset.width * scale) : undefined;
   const height = Number(asset.height || 0) > 0 ? Math.round(asset.height * scale) : undefined;
-  const actions = width && height ? [{ resize: { width, height } }] : [];
-  const result = await ImageManipulator.manipulateAsync(
+  const result = await ImageResizer.createResizedImage(
     asset.uri,
-    actions,
-    {
-      compress: 0.82,
-      format: ImageManipulator.SaveFormat.JPEG,
-    },
+    width || Number(asset.width) || TARGET_VIDEO_MAX_SIZE,
+    height || Number(asset.height) || TARGET_VIDEO_MAX_SIZE,
+    'JPEG',
+    82,
   );
 
   return {
@@ -101,33 +94,29 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [showModelChoices, setShowModelChoices] = useState(false);
   const [loading, setLoading] = useState(false);
-  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const recorderState = useAudioRecorderState(audioRecorder);
+  const [isRecording, setIsRecording] = useState(false);
   const recorderIsRecordingRef = useRef(false);
-
-  useEffect(() => {
-    recorderIsRecordingRef.current = recorderState.isRecording;
-  }, [recorderState.isRecording]);
 
   const stopActiveRecording = useCallback(async (saveRecording) => {
     if (!recorderIsRecordingRef.current) return null;
 
     try {
-      await audioRecorder.stop();
+      const uri = await Sound.stopRecorder();
       recorderIsRecordingRef.current = false;
-      if (!saveRecording || !audioRecorder.uri) return null;
+      setIsRecording(false);
+      if (!saveRecording || !uri) return null;
 
       const audioAsset = {
-        uri: audioRecorder.uri,
+        uri,
         type: 'audio',
         fileName: `audio_${Date.now()}.m4a`,
       };
       setSelectedMedia(audioAsset);
       return audioAsset;
     } finally {
-      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+      Sound.removeRecordBackListener();
     }
-  }, [audioRecorder]);
+  }, []);
 
   useEffect(() => {
     if (visible) return;
@@ -149,21 +138,20 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
       return;
     }
 
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) {
+    const permission = await VisionCamera.requestCameraPermission();
+    if (permission !== 'granted') {
       Alert.alert(t('photoRejectedTitle'), t('cameraPermission'));
       return;
     }
 
     setLoading(true);
     try {
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: [mediaType],
-        allowsEditing: false,
+      const result = await launchCamera({
+        mediaType: mediaType === 'videos' ? 'video' : 'photo',
         quality: mediaType === 'videos' ? undefined : 1,
       });
 
-      if (result.canceled || !result.assets?.[0]) return;
+      if (result.didCancel || !result.assets?.[0]) return;
       const asset = result.assets[0];
       const normalizedAsset = mediaType === 'videos'
         ? await compressCapturedVideo(asset)
@@ -183,12 +171,11 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
   const chooseModel = async (model) => {
     setLoading(true);
     try {
-      const asset = Asset.fromModule(model.source);
-      await asset.downloadAsync();
-      if (!asset.localUri) throw new Error(t('localModelMissing'));
+      const asset = Image.resolveAssetSource(model.source);
+      if (!asset?.uri) throw new Error(t('localModelMissing'));
 
       setSelectedMedia({
-        uri: asset.localUri,
+        uri: asset.uri,
         type: 'model',
         mimeType: 'model/gltf-binary',
         fileName: model.fileName,
@@ -204,20 +191,21 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
   };
 
   const toggleAudioRecording = async () => {
-    if (recorderState.isRecording) {
+    if (isRecording) {
       await stopActiveRecording(true);
       return;
     }
 
-    const permission = await AudioModule.requestRecordingPermissionsAsync();
-    if (!permission.granted) {
+    const permission = await VisionCamera.requestMicrophonePermission();
+    if (permission !== 'granted') {
       Alert.alert(t('error'), t('microphonePermission'));
       return;
     }
 
-    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
-    await audioRecorder.prepareToRecordAsync();
-    audioRecorder.record();
+    Sound.setSubscriptionDuration(0.25);
+    await Sound.startRecorder();
+    recorderIsRecordingRef.current = true;
+    setIsRecording(true);
   };
 
   const handleSubmit = async () => {
@@ -310,7 +298,7 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
             </TouchableOpacity>
             <TouchableOpacity style={styles.mediaButton} onPress={toggleAudioRecording} disabled={loading}>
               <Text style={styles.mediaButtonText}>
-                {recorderState.isRecording ? t('stopRecording') : selectedMedia?.type === 'audio' ? t('selectedAudio') : t('recordAudio')}
+                {isRecording ? t('stopRecording') : selectedMedia?.type === 'audio' ? t('selectedAudio') : t('recordAudio')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity

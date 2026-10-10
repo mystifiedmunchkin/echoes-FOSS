@@ -1,5 +1,4 @@
-/** Legacy Expo FileSystem model-cache helper, retained outside the active radar cache path. */
-import { Paths, File, Directory } from 'expo-file-system';
+import { Dirs, FileSystem } from 'react-native-file-access';
 import { translate } from '../../constants/i18n';
 
 export async function getLocalModelUri(remoteUrl: string): Promise<string> {
@@ -21,22 +20,17 @@ export async function getLocalModelUri(remoteUrl: string): Promise<string> {
   }
 
   try {
-    const cacheDir = Paths.cache;
-
-    const modelsDir = new Directory(cacheDir, 'models');
-    if (!modelsDir.exists) {
-      await modelsDir.create();
-    }
+    const modelsDir = `${Dirs.CacheDir}/models`;
+    if (!(await FileSystem.exists(modelsDir))) await FileSystem.mkdir(modelsDir);
 
     const fileName = parsedUrl.pathname.split('/').pop() || `model_${Date.now()}.glb`;
-    const targetFile = new File(modelsDir, fileName);
+    const targetPath = `${modelsDir}/${fileName}`;
 
-    if (targetFile.exists) {
-      return targetFile.uri;
-    }
+    if (await FileSystem.exists(targetPath)) return `file://${targetPath}`;
 
-    const downloadedFile = await File.downloadFileAsync(parsedUrl.href, targetFile);
-    return downloadedFile.uri;
+    const response = await FileSystem.fetch(parsedUrl.href, { path: targetPath });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return `file://${targetPath}`;
   } catch (error) {
     console.error(translate('modelDownloadError', { url: modelUrl }), error);
     return modelUrl;

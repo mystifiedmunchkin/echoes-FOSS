@@ -1,0 +1,14 @@
+Navigation,	expo-router,React Navigation ou navigation native
+Caméra,	expo-camera,react-native-vision-camera
+Fichiers,expo-file-system,react-native-fs ou module natif dédié
+Audio,	expo-audio,react-native-track-player / module audio natif
+Vidéo,expo-video,react-native-video
+Images,	expo-image,Image React Native ou bibliothèque native
+Sélection d’images,expo-image-picker,react-native-image-picker
+Manipulation d’images,expo-image-manipulator,react-native-image-resizer ou module natif
+Informations appareil,expo-device,react-native-device-info
+Localisation linguistique,expo-localization,react-native-localize
+Assets,expo-asset,require() React Native et assets Android
+Splash screen,expo-splash-screen,	ressources Android natives
+Status bar/system UI,Expo Status Bar/System UI,APIs React Native et Android natives
+Géolocalisation personnalisée,expo-modules-core,TurboModule ou Native Module React Native

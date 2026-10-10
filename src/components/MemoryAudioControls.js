@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import Sound from 'react-native-nitro-sound';
 import { COLORS } from '../../app/theme';
 import { useI18n } from '../../constants/i18n';
 
@@ -13,20 +13,35 @@ const formatDuration = (seconds) => {
 
 export function MemoryAudioControls({ source }) {
   const { t } = useI18n();
-  const player = useAudioPlayer(source, { updateInterval: 250 });
-  const status = useAudioPlayerStatus(player);
-  const duration = Number.isFinite(status.duration) ? status.duration : 0;
+  const [status, setStatus] = useState({ duration: 0, currentTime: 0, playing: false });
+  const startedRef = useRef(false);
+  const duration = Number.isFinite(status.duration) ? status.duration / 1000 : 0;
   const currentTime = Math.min(
-    Number.isFinite(status.currentTime) ? status.currentTime : 0,
+    Number.isFinite(status.currentTime) ? status.currentTime / 1000 : 0,
     duration,
   );
 
   useEffect(() => {
-    setAudioModeAsync({
-      playsInSilentMode: true,
-      interruptionMode: 'mixWithOthers',
-    }).catch((error) => console.warn(t('audioConfigurationError'), error));
-  }, [player]);
+    startedRef.current = false;
+    Sound.setSubscriptionDuration(0.25);
+    Sound.addPlayBackListener(({ duration: nextDuration, currentPosition }) => {
+      setStatus((current) => ({
+        duration: nextDuration,
+        currentTime: currentPosition,
+        playing: current.playing,
+      }));
+    });
+    Sound.addPlaybackEndListener(() => {
+      startedRef.current = false;
+      setStatus((current) => ({ ...current, playing: false, currentTime: 0 }));
+    });
+
+    return () => {
+      Sound.removePlayBackListener();
+      Sound.removePlaybackEndListener();
+      Sound.stopPlayer().catch(() => undefined);
+    };
+  }, [source]);
 
   return (
     <View style={styles.container}>
@@ -37,10 +52,19 @@ export function MemoryAudioControls({ source }) {
       <View style={styles.controls}>
         <TouchableOpacity
           style={styles.playButton}
-          onPress={() => {
+          onPress={async () => {
             try {
-              if (status.playing) player.pause();
-              else player.play();
+              if (status.playing) {
+                await Sound.pausePlayer();
+                setStatus((current) => ({ ...current, playing: false }));
+              } else if (startedRef.current) {
+                await Sound.resumePlayer();
+                setStatus((current) => ({ ...current, playing: true }));
+              } else {
+                await Sound.startPlayer(source);
+                startedRef.current = true;
+                setStatus((current) => ({ ...current, playing: true }));
+              }
             } catch (error) {
               console.warn(t('audioPlaybackError'), error);
             }
@@ -59,7 +83,10 @@ export function MemoryAudioControls({ source }) {
           maximumTrackTintColor={COLORS.surfaceMuted}
           thumbTintColor={COLORS.accentStrong}
           onSlidingComplete={(value) => {
-            player.currentTime = value;
+            if (!startedRef.current) return;
+            Sound.seekToPlayer(value * 1000).catch((error) => {
+              console.warn(t('audioPlaybackError'), error);
+            });
           }}
           accessibilityLabel={t('audioTimeline')}
         />

@@ -26,6 +26,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "permissions": [
+        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.FOREGROUND_SERVICE",
@@ -40,17 +41,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-localization",
-      "expo-image-picker",
-      "expo-video",
-      [
-        "expo-audio",
-        {
-          "microphonePermission": "ECHOES a besoin du microphone pour enregistrer les souvenirs audio."
-        }
-      ],
       "react-native-compressor",
-      "expo-asset",
       "./plugins/without-viro-geolocation",
       [
         "@reactvision/react-viro",
@@ -65,8 +56,7 @@
             "savephotosPermission": "ECHOES a besoin d'enregistrer les souvenirs dans vos photos."
           }
         }
-      ],
-      "expo-router"
+      ]
     ]
   }
 }

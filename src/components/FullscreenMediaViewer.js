@@ -1,31 +1,23 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Image } from 'expo-image';
-import { useVideoPlayer, VideoView } from 'expo-video';
-
-function FullscreenVideo({ source }) {
-  const player = useVideoPlayer(source, (videoPlayer) => {
-    videoPlayer.loop = false;
-  });
-
-  return (
-    <VideoView
-      style={styles.media}
-      player={player}
-      allowsPictureInPicture={false}
-      contentFit="contain"
-      nativeControls
-      surfaceType="textureView"
-    />
-  );
-}
+import { Image, StyleSheet, View } from 'react-native';
+import Video from 'react-native-video';
 
 export function FullscreenMediaViewer({ source, type }) {
-  if (type === 'video') return <FullscreenVideo source={source} />;
+  if (type === 'video') {
+    return (
+      <Video
+        controls
+        paused={false}
+        resizeMode="contain"
+        source={{ uri: source }}
+        style={styles.media}
+      />
+    );
+  }
 
   return (
     <View style={styles.imageContainer}>
-      <Image source={source} style={styles.media} contentFit="contain" />
+      <Image source={{ uri: source }} style={styles.media} resizeMode="contain" />
     </View>
   );
 }
