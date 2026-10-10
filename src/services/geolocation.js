@@ -1,5 +1,5 @@
 import { PermissionsAndroid, Platform } from 'react-native';
-import Geolocation from 'react-native-geolocation-service';
+import Geolocation from '@react-native-community/geolocation';
 
 export async function requestForegroundPermissionsAsync() {
   if (Platform.OS === 'android') {
@@ -12,21 +12,25 @@ export async function requestForegroundPermissionsAsync() {
       canAskAgain: result !== PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN,
     };
   }
-
-  const status = await Geolocation.requestAuthorization('whenInUse');
-  return {
-    status: status === 'granted' ? 'granted' : 'denied',
-    granted: status === 'granted',
-    canAskAgain: status === 'disabled' || status === 'denied',
-  };
+  return { status: 'granted', granted: true };
 }
 
 export function getCurrentPositionAsync(options = {}) {
   return new Promise((resolve, reject) => {
-    Geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy: true,
-      timeout: options.timeout ?? 10000,
-      maximumAge: options.maximumAge ?? 10000,
-    });
+    // Note: 'enableHighAccuracy: false' is often more reliable on non-GMS devices
+    // as 'true' often forces a FusedLocationProvider (GMS) call which will fail.
+    Geolocation.getCurrentPosition(
+      (position) => resolve(position),
+      (error) => {
+        // Fallback or specific error handling
+        console.warn("Geolocation error:", error);
+        reject(error);
+      },
+      {
+        enableHighAccuracy: false, // Changed to false for better non-GMS compatibility
+        timeout: options.timeout ?? 20000,
+        maximumAge: 10000,
+      }
+    );
   });
 }

@@ -11,7 +11,7 @@ import {
   Alert,
   Image,
 } from 'react-native';
-import { Camera as VisionCamera } from 'react-native-vision-camera';
+import { Camera as VisionCameraModule } from 'react-native-vision-camera';
 import { launchCamera } from 'react-native-image-picker';
 import ImageResizer from '@bam.tech/react-native-image-resizer';
 import Sound from 'react-native-nitro-sound';
@@ -138,7 +138,7 @@ export const CreateMemoryModal = ({ visible, onClose, currentLocation, onMemoryC
       return;
     }
 
-    const permission = await VisionCamera.requestCameraPermission();
+    const permission = await VisionCameraModule.requestCameraPermission();
     if (permission !== 'granted') {
       Alert.alert(t('photoRejectedTitle'), t('cameraPermission'));
       return;

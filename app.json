@@ -42,7 +42,6 @@
     },
     "plugins": [
       "react-native-compressor",
-      "./plugins/without-viro-geolocation",
       [
         "@reactvision/react-viro",
         {

@@ -9,7 +9,7 @@ import {
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import DeviceInfo from 'react-native-device-info';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Camera as VisionCamera } from 'react-native-vision-camera';
+import { Camera as VisionCameraModule, useCameraPermission } from 'react-native-vision-camera';
 
 const isProblematicARDevice = () => {
   const manufacturer = DeviceInfo.getManufacturerSync().toLowerCase();
@@ -97,15 +97,16 @@ function AppContent() {
   // --- Camera AR state and management ---
   const [showCamera, setShowCamera] = useState(false);
   const [cameraKey, setCameraKey] = useState(0);
+  const { hasPermission, requestPermission } = useCameraPermission();
 
-  useEffect(() => {
-    if (isProblematicARDevice()) {
-      Alert.alert(
-        t('samsungDeviceMode'),
-        t('samsungDeviceDescription'),
-      );
-    }
-  }, [t]);
+   useEffect(() => {
+     if (isProblematicARDevice()) {
+       Alert.alert(
+         t('samsungDeviceMode'),
+         t('samsungDeviceDescription'),
+       );
+     }
+   }, [t]);
 
   const [arSessionMemories, setArSessionMemories] = useState([]);
   const [isPlacingMode, setIsPlacingMode] = useState(false);
@@ -338,15 +339,17 @@ function AppContent() {
 
   // --- Request camera permission and start AR session (FIRST)
   const requestCameraAndStart = useCallback(async () => {
-    let permission;
-    try {
-      permission = await VisionCamera.requestCameraPermission();
-    } catch (error) {
-      console.error(t('cameraPermissionRequestError'), error);
-      Alert.alert(t('error'), t('cameraError'));
-      return;
+    let granted = hasPermission;
+    if (!granted) {
+      try {
+        granted = await requestPermission();
+      } catch (error) {
+        console.error(t('cameraPermissionRequestError'), error);
+        Alert.alert(t('error'), t('cameraError'));
+        return;
+      }
     }
-    if (permission !== 'granted') return Alert.alert(t('error'), t('cameraPermissionDenied'));
+    if (!granted) return Alert.alert(t('error'), t('cameraPermissionDenied'));
 
     if (!location) {
       Alert.alert(t('error'), t('initializingRadar'));
@@ -354,7 +357,7 @@ function AppContent() {
     }
 
     openARCamera();
-  }, [location, openARCamera, t]);
+  }, [hasPermission, requestPermission, location, openARCamera, t]);
 
   const handleOpenARCamera = useCallback(async () => {
     requestCameraAndStart();
