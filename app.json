@@ -22,7 +22,8 @@
       "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#13121E",
-        "foregroundImage": "./assets/android-icon-foreground.png"
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",

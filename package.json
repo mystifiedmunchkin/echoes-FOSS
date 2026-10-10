@@ -12,7 +12,13 @@
     "android:clean": "cd android && ./gradlew clean",
     "android:release": "npx expo prebuild --clean && cd android && ./gradlew clean && ./gradlew assembleRelease"
   },
+  "expo": {
+    "autolinking": {
+      "nativeModulesDir": "./modules"
+    }
+  },
   "dependencies": {
+    "@echoes/geolocation": "file:./modules/echoes-geolocation",
     "@expo/ui": "~57.0.22",
     "@maplibre/maplibre-react-native": "^11.5.0",
     "@react-native-async-storage/async-storage": "2.2.0",
