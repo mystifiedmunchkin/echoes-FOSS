@@ -3,7 +3,7 @@
  * It is not mounted by the active application path; useRadar owns live location setup.
  */
 import { useState, useEffect } from 'react';
-import * as Location from 'expo-location';
+import * as Location from '../services/geolocation';
 import { translate } from '../../constants/i18n';
 
 const MONTAUBAN_DEFAULT = {
@@ -16,23 +16,21 @@ export const useLocation = () => {
 
   useEffect(() => {
     let isMounted = true;
-    let subscription;
+    let timer;
 
     async function startWatchingPosition() {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') return;
 
-        subscription = await Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.High,
-            timeInterval: 2000,
-            distanceInterval: 1,
-          },
-          (newLocation) => {
-            if (isMounted) setLocation(newLocation);
-          }
-        );
+        const updatePosition = async () => {
+          const newLocation = await Location.getCurrentPositionAsync({ timeout: 10000 })
+            .catch(() => null);
+          if (isMounted && newLocation) setLocation(newLocation);
+        };
+
+        await updatePosition();
+        timer = setInterval(updatePosition, 2000);
       } catch (e) {
         console.warn(translate('gpsTestUnavailable'), e);
       }
@@ -42,7 +40,7 @@ export const useLocation = () => {
 
     return () => {
       isMounted = false;
-      subscription?.remove();
+      if (timer) clearInterval(timer);
     };
   }, []);
 

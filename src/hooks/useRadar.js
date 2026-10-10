@@ -3,10 +3,10 @@
  * It supplies map/radar data only; AR rendering uses local plane coordinates.
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Linking } from 'react-native';
 import { getAuthToken } from '../services/auth';
+import * as Location from '../services/geolocation';
 import { translate } from '../../constants/i18n';
 
 const PRIVATE_FILES_BASE_URL = 'https://echoes.sophiehorner.art/api/private-files';
@@ -348,10 +348,9 @@ export function useRadar(initialRadius = 500) {
     }
 
     setPermissionStatus('granted');
-    const currentLoc = (await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
+    const currentLoc = await Location.getCurrentPositionAsync({
       timeout: 5000,
-    }).catch(() => null)) || (await Location.getLastKnownPositionAsync().catch(() => null));
+    }).catch(() => null);
 
     if (currentLoc) {
       setLocation((prev) => (prev?.latitude === currentLoc.coords.latitude &&

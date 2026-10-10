@@ -12,40 +12,16 @@ import {
   ViroMaterials,
   ViroText,
 } from '@reactvision/react-viro';
-import { MemoryRecord, NearbyMemory, ViroARViewProps } from './ViroAR.types';
+import { ViroARViewProps } from './ViroAR.types';
 
 ViroMaterials.createMaterials({
   planeMaterial: {
     diffuseColor: '#FFFFFF',
     lightingModel: 'Lambert',
-    opacity: 0.3,
   },
 });
 
-type SceneProps = {
-  arMemories: MemoryRecord[];
-  creatingMemoryMode: boolean;
-  memoryToPlace?: MemoryRecord | null;
-  nearbyMemories: NearbyMemory[];
-  onMemoryCollected?: ViroARViewProps['onMemoryCollected'];
-  onMemorySelected?: ViroARViewProps['onMemorySelected'];
-  onMemoryPlaced?: ViroARViewProps['onMemoryPlaced'];
-  onPlaneTapped?: ViroARViewProps['onPlaneTapped'];
-  onModelLoadingStatus?: ViroARViewProps['onModelLoadingStatus'];
-  resetPlacedMemoryKey?: number;
-  canCollect?: boolean;
-};
-
-type MemoryARSceneProps = {
-  sceneNavigator?: { viroAppProps?: SceneProps };
-};
-
-function MemoryARScene({ sceneNavigator }: MemoryARSceneProps) {
-  const {
-    creatingMemoryMode = false,
-    memoryToPlace,
-  } = sceneNavigator?.viroAppProps || {};
-
+function MemoryARScene() {
   return (
     <ViroARScene
       anchorDetectionTypes={['PlanesHorizontal', 'PlanesVertical']}

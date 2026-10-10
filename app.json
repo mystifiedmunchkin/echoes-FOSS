@@ -12,6 +12,7 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "ECHOES a besoin de la caméra pour afficher les souvenirs en Réalité Augmentée.",
+        "NSLocationWhenInUseUsageDescription": "ECHOES utilise votre position pour afficher les souvenirs proches.",
         "NSPhotoLibraryUsageDescription": "ECHOES a besoin d'accéder aux photos pour les souvenirs.",
         "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos",
         "NSMicrophoneUsageDescription": "ECHOES a besoin du microphone pour les souvenirs audio."
@@ -49,12 +50,7 @@
       ],
       "react-native-compressor",
       "expo-asset",
-      [
-        "expo-location",
-        {
-          "locationWhenInUsePermission": "ECHOES utilise votre position pour afficher les souvenirs proches."
-        }
-      ],
+      "./plugins/without-viro-geolocation",
       [
         "@reactvision/react-viro",
         {
